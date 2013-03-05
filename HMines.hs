@@ -1,4 +1,5 @@
 import Control.Monad
+import Control.Monad.Loops
 import Control.Monad.State
 import Control.Monad.Trans
 import Data.Array.IO
@@ -6,6 +7,7 @@ import Data.IORef
 import Data.Ix
 import Data.List
 import Data.List.Split
+import Data.Maybe
 import Graphics.UI.Gtk hiding (eventSent, eventButton)
 import Graphics.UI.Gtk.Gdk.Events
 import System.Random.Shuffle
@@ -19,7 +21,9 @@ main = do
       let x = 10
           y = 10
           numMines = 10
-
+      x <- untilJust (putStrLn "x size of board: " >> fmap readMaybe getLine) :: IO Int
+      y <- untilJust (putStrLn "y size of board: " >> fmap readMaybe getLine) :: IO Int
+      numMines <- untilJust (putStrLn "number of mines in board: " >> fmap readMaybe getLine >>= \mRet -> return $ (mRet >>= \ret -> if ret < x * y then Just ret else Nothing)) :: IO Int
       board@(Board _ _ mines _) <- createBoard (x, y) numMines
 
       initGUI -- startup the GUI
@@ -133,3 +137,6 @@ numberSurrounding (x,y) board@(Board _ _ mines _) = length . intersect mines $ g
 
 getSurrounding :: (Int, Int) -> Board -> [(Int, Int)]
 getSurrounding c@(x,y) (Board (xSize, ySize) _ _ _) = [(x + dx, y + dy) | dx <- [-1,0,1], dy <- [-1,0,1], x + dx >= 0, x + dx < xSize, y + dy >= 0, y + dy < ySize, (dx /= 0 || dy /= 0)]
+
+readMaybe :: (Read a) => String -> Maybe a
+readMaybe = fmap fst . listToMaybe . reads
