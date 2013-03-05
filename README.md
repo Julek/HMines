@@ -1,0 +1,4 @@
+HMines
+======
+
+Haskell Minesweeper
