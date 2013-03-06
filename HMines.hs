@@ -18,11 +18,8 @@ data Status = Win | Loose | Playing
 
 main :: IO ()
 main = do
-      let x = 10
-          y = 10
-          numMines = 10
-      x <- untilJust (putStrLn "x size of board: " >> fmap readMaybe getLine) :: IO Int
-      y <- untilJust (putStrLn "y size of board: " >> fmap readMaybe getLine) :: IO Int
+      x <- untilJust (putStrLn "x size of board: " >> fmap readMaybe getLine >>= \mRet -> return $ (mRet >>= \ret -> if ret >= 4 then Just ret else Nothing)) :: IO Int
+      y <- untilJust (putStrLn "y size of board: " >> fmap readMaybe getLine >>= \mRet -> return $ (mRet >>= \ret -> if ret >= 4 then Just ret else Nothing)) :: IO Int
       numMines <- untilJust (putStrLn "number of mines in board: " >> fmap readMaybe getLine >>= \mRet -> return $ (mRet >>= \ret -> if ret < x * y then Just ret else Nothing)) :: IO Int
       board@(Board _ _ mines _) <- createBoard (x, y) numMines
 
@@ -42,7 +39,7 @@ main = do
                        buttonSetFocusOnClick button False
                        writeArray buttonArray c button
                        tableAttachDefaults table button x (x+1) y (y+1)
-                       ) (range ((0, 0), (x-1, y-1)))      
+                       ) (range ((0, 0), (x-1, y-1)))
       containerAdd window table
 
       widgetShowAll window
